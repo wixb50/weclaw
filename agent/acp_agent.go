@@ -428,7 +428,8 @@ func (a *ACPAgent) Chat(ctx context.Context, conversationID string, message stri
 				}
 			}
 		case done := <-promptDone:
-			// Drain remaining notifications
+			// Drain remaining until the stream idles for 500ms.
+			idleTimer := time.NewTimer(500 * time.Millisecond)
 			for {
 				select {
 				case update := <-notifyCh:
@@ -438,7 +439,14 @@ func (a *ACPAgent) Chat(ctx context.Context, conversationID string, message stri
 							textParts = append(textParts, text)
 						}
 					}
-				default:
+					if !idleTimer.Stop() {
+						select {
+						case <-idleTimer.C:
+						default:
+						}
+					}
+					idleTimer.Reset(500 * time.Millisecond)
+				case <-idleTimer.C:
 					goto drained
 				}
 			}
