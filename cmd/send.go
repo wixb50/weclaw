@@ -47,7 +47,17 @@ var sendCmd = &cobra.Command{
 			return fmt.Errorf("no accounts found, run 'weclaw start' first")
 		}
 
-		client := ilink.NewClient(accounts[0])
+		var matched *ilink.Credentials
+		for _, a := range accounts {
+			if a.ILinkUserID == sendTo {
+				matched = a
+				break
+			}
+		}
+		if matched == nil {
+			return fmt.Errorf("no account found matching target user %q", sendTo)
+		}
+		client := ilink.NewClient(matched)
 
 		if sendText != "" {
 			if err := messaging.SendTextReply(ctx, client, sendTo, sendText, "", ""); err != nil {

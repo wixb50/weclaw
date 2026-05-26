@@ -24,6 +24,7 @@ type Client struct {
 	baseURL    string
 	botToken   string
 	botID      string
+	userID     string
 	httpClient *http.Client
 	wechatUIN  string
 }
@@ -38,6 +39,7 @@ func NewClient(creds *Credentials) *Client {
 		baseURL:    baseURL,
 		botToken:   creds.BotToken,
 		botID:      creds.ILinkBotID,
+		userID:     creds.ILinkUserID,
 		httpClient: &http.Client{},
 		wechatUIN:  generateWechatUIN(),
 	}
@@ -55,6 +57,11 @@ func NewUnauthenticatedClient() *Client {
 // BotID returns the bot's user ID.
 func (c *Client) BotID() string {
 	return c.botID
+}
+
+// UserID returns the bot's iLink user ID (e.g. "user_id@im.wechat").
+func (c *Client) UserID() string {
+	return c.userID
 }
 
 // GetUpdates performs a long-poll for new messages.

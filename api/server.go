@@ -81,8 +81,17 @@ func (s *Server) handleSend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use the first client
-	client := s.clients[0]
+	var client *ilink.Client
+	for _, c := range s.clients {
+		if c.UserID() == req.To {
+			client = c
+			break
+		}
+	}
+	if client == nil {
+		http.Error(w, fmt.Sprintf("no account found matching target user %q", req.To), http.StatusNotFound)
+		return
+	}
 	ctx := r.Context()
 
 	// Send text if provided
